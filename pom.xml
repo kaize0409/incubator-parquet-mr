@@ -92,6 +92,7 @@
     <thrift.version>0.7.0</thrift.version>
     <fastutil.version>6.5.7</fastutil.version>
     <semver.api.version>0.9.33</semver.api.version>
+    <jodd.version>3.5.2</jodd.version>
   </properties>
 
   <modules>

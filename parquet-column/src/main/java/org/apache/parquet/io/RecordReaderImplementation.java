@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -68,7 +68,7 @@ class RecordReaderImplementation<T> extends RecordReader<T> {
       this.nextLevel = nextLevel;
       this.nextState = nextState;
       this.defined = defined;
-      // means going up the tree (towards the leaves) of the record
+      // means going up the tree (towards the lealves) of the record
       // true if we need to open up groups in this case
       goingUp = startLevel <= depth;
       // means going down the tree (towards the root) of the record
@@ -473,12 +473,14 @@ class RecordReaderImplementation<T> extends RecordReader<T> {
     int maxDefinitionLevel = column.getMaxDefinitionLevel();
 
     int index = 0;
+    vector.noNulls = true;
     for ( ; index < ColumnVector.MAX_VECTOR_LENGTH && current < total; index++, current++) {
-      if (reader.getCurrentDefinitionLevel() == maxDefinitionLevel) {
+      if (reader.getCurrentDefinitionLevel() >= maxDefinitionLevel) {
         vector.readFrom(reader, index);
         vector.isNull[index] = false;
       } else {
         vector.isNull[index] = true;
+        vector.noNulls = false;
       }
       reader.consume();
     }

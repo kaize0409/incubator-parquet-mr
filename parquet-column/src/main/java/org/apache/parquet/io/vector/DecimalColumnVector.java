@@ -20,18 +20,21 @@ package org.apache.parquet.io.vector;
 
 import org.apache.parquet.column.ColumnReader;
 import org.apache.parquet.io.ColumnVector;
+import org.apache.parquet.io.api.Binary;
 
-public class FloatColumnVector extends ColumnVector
-{
-  public final double[] values;
+public class DecimalColumnVector extends ColumnVector {
+  public Binary[] vectors;
+  public short scale;
+  public short precision;
 
-  public FloatColumnVector() {
-    this.valueType = float.class;
-    values = new double[MAX_VECTOR_LENGTH];
+  public DecimalColumnVector(){
+    vectors = new Binary[MAX_VECTOR_LENGTH];
   }
 
   @Override
-  public void doReadFrom(ColumnReader reader, int index) {
-    values[index] = reader.getFloat();
+  protected void doReadFrom(
+    ColumnReader reader,
+    int index) {
+    vectors[index] = reader.getBinary();
   }
 }

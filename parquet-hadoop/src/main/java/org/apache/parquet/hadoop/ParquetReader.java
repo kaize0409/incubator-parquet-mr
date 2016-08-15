@@ -66,6 +66,7 @@ public class ParquetReader<T> implements Closeable {
 
   private InternalParquetRecordReader<T> reader;
 
+  boolean skipTimestampConversion = false;
   /**
    * @param file the file to read
    * @param readSupport to materialize records
@@ -122,6 +123,8 @@ public class ParquetReader<T> implements Closeable {
     this.filter = checkNotNull(filter, "filter");
     this.conf = conf;
 
+    skipTimestampConversion = conf.
+      getBoolean("hive.parquet.timestamp.skip.conversion", skipTimestampConversion);
     FileSystem fs = file.getFileSystem(conf);
     List<FileStatus> statuses = Arrays.asList(fs.listStatus(file, HiddenFileFilter.INSTANCE));
     List<Footer> footers = ParquetFileReader.readAllFootersInParallelUsingSummaryFiles(conf, statuses, false);
@@ -221,7 +224,7 @@ public class ParquetReader<T> implements Closeable {
        columnSchemas[i] = new MessageType(requestedSchema.getFieldName(i), requestedSchema.getType(i));
 
        if (columnVector == null) {
-         columnVector = ColumnVector.from(columns.get(i));
+         columnVector = ColumnVector.from(columns.get(i), skipTimestampConversion);
        }
 
        rowBatch.getColumns()[i] = columnVector;

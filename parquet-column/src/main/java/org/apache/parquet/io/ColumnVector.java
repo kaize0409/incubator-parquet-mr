@@ -20,12 +20,13 @@ package org.apache.parquet.io;
 import org.apache.parquet.column.ColumnDescriptor;
 import org.apache.parquet.column.ColumnReader;
 import org.apache.parquet.io.vector.BooleanColumnVector;
-import org.apache.parquet.io.vector.ByteColumnVector;
+import org.apache.parquet.io.vector.BytesColumnVector;
 import org.apache.parquet.io.vector.DoubleColumnVector;
 import org.apache.parquet.io.vector.FloatColumnVector;
 import org.apache.parquet.io.vector.IntColumnVector;
 import org.apache.parquet.io.vector.LongColumnVector;
 import org.apache.parquet.io.vector.ObjectColumnVector;
+import org.apache.parquet.io.vector.TimestampColumnVector;
 
 public abstract class ColumnVector
 {
@@ -34,8 +35,19 @@ public abstract class ColumnVector
   public final boolean [] isNull;
   private int numValues;
 
+  // If the whole column vector has no nulls, this is true, otherwise false.
+  public boolean noNulls;
+
+  /*
+   * True if same value repeats for whole column vector.
+   * If so, vector[0] holds the repeating value.
+   */
+  public boolean isRepeating;
+
   public ColumnVector() {
     this.isNull = new boolean[MAX_VECTOR_LENGTH];
+    noNulls = true;
+    isRepeating = false;
   }
 
   /**
@@ -56,7 +68,7 @@ public abstract class ColumnVector
     this.numValues = numValues;
   }
 
-  public static ColumnVector from(ColumnDescriptor descriptor) {
+  public static ColumnVector from(ColumnDescriptor descriptor,boolean skipTimestampConversion) {
     switch (descriptor.getType()) {
       case BOOLEAN:
         return new BooleanColumnVector();
@@ -68,10 +80,11 @@ public abstract class ColumnVector
         return new IntColumnVector();
       case INT64:
         return new LongColumnVector();
-      case BINARY:
       case INT96:
+        return new TimestampColumnVector(skipTimestampConversion);
+      case BINARY:
       case FIXED_LEN_BYTE_ARRAY:
-        return new ByteColumnVector();
+        return new BytesColumnVector();
       default:
         throw new IllegalArgumentException("Unhandled column type " + descriptor.getType());
     }

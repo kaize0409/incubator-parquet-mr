@@ -45,7 +45,7 @@ public class ParquetVectorTestUtils {
 
   public static <T> void assertSingleColumnRead(ColumnVector vector, Class<T> elementType, int index, T expectedValue) {
     if (elementType == int.class) {
-      int read = ((IntColumnVector) vector).values[index];
+      long read = ((IntColumnVector) vector).values[index];
       log(read);
       assertEquals(expectedValue, read);
     } else if (elementType == long.class) {
@@ -57,11 +57,11 @@ public class ParquetVectorTestUtils {
       log(read);
       assertEquals(Double.class.cast(expectedValue), read, 0.01);
     } else if (elementType == float.class) {
-      float read = ((FloatColumnVector) vector).values[index];
+      double read = ((FloatColumnVector) vector).values[index];
       log(read);
       assertEquals(Float.class.cast(expectedValue), read, 0.01);
     } else if (elementType == boolean.class) {
-      boolean read = ((BooleanColumnVector) vector).values[index];
+      long read = ((BooleanColumnVector) vector).values[index];
       log(read);
       assertEquals(expectedValue, read);
     }

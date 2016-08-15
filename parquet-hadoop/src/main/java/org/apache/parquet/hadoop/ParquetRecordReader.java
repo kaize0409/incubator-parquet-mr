@@ -160,12 +160,17 @@ public class ParquetRecordReader<T> extends RecordReader<Void, T> {
     BenchmarkCounter.initCounterFromReporter(reporter,configuration);
     initializeInternalReader(toParquetSplit(inputSplit), configuration);
   }
+  boolean skipTimestampConversion = false;
 
   private void initializeInternalReader(ParquetInputSplit split, Configuration configuration) throws IOException {
     Path path = split.getPath();
     long[] rowGroupOffsets = split.getRowGroupOffsets();
     List<BlockMetaData> filteredBlocks;
     ParquetMetadata footer;
+
+    skipTimestampConversion = configuration.
+      getBoolean("hive.parquet.timestamp.skip.conversion", skipTimestampConversion);
+
     // if task.side.metadata is set, rowGroupOffsets is null
     if (rowGroupOffsets == null) {
       // then we need to apply the predicate push down filter
@@ -270,7 +275,7 @@ public class ParquetRecordReader<T> extends RecordReader<Void, T> {
       columnSchemas[i] = new MessageType(requestedSchema.getFieldName(i), requestedSchema.getType(i));
 
       if (columnVector == null) {
-        columnVector = ColumnVector.from(columns.get(i));
+        columnVector = ColumnVector.from(columns.get(i), skipTimestampConversion);
       }
 
       rowBatch.getColumns()[i] = columnVector;
